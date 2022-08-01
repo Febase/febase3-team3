@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import MapContainer from './MapContainer';
 
 function App() {
-  return <MapContainer />;
+  return (
+    <>
+      <MapContainer />
+    </>
+  );
 }
 
 export default App;

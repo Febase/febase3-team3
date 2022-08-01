@@ -3,6 +3,7 @@ import * as am5 from '@amcharts/amcharts5';
 import * as am5map from '@amcharts/amcharts5/map';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5geodata_worldLow from '@amcharts/amcharts5-geodata/worldLow';
+import am5geodata_continentsLow from '@amcharts/amcharts5-geodata/continentsLow';
 import React from 'react';
 
 export default function MapContainer() {
@@ -24,7 +25,7 @@ export default function MapContainer() {
     const mapChart = am5map.MapChart.new(root, {
       panX: 'rotateX',
       panY: 'translateY',
-      projection: am5map.geoMercator(),
+      projection: am5map.geoNaturalEarth1(),
       homeGeoPoint: { latitude: 2, longitude: 2 },
     });
     let chart = root.container.children.push(mapChart);
@@ -81,22 +82,116 @@ export default function MapContainer() {
     let backgroundSeries = chart.series.push(
       am5map.MapPolygonSeries.new(root, {}),
     );
+
+    // create background series
     backgroundSeries.mapPolygons.template.setAll({
-      fill: root.interfaceColors.get('alternativeBackground'),
-      fillOpacity: 0,
-      strokeOpacity: 0,
+      fill: '#fff',
+      // fill: colors.next(),
+      // fillPattern: am5.LinePattern.new(root, {
+      //   color: am5.color(0xffffff),
+      // }),
+      // fillOpacity: 0,
+      // strokeOpacity: 0,
     });
 
     backgroundSeries.data.push({
       geometry: am5map.getGeoRectangle(90, 180, -90, -180),
     });
 
+    // 대륙/지역별 무늬 적용
+    var colors = am5.ColorSet.new(root, {});
+
+    // Create polygon series
     let polygonSeries = chart.series.push(
       am5map.MapPolygonSeries.new(root, {
-        geoJSON: am5geodata_worldLow,
+        geoJSON: am5geodata_continentsLow,
+        exclude: ['antarctica'],
       }),
     );
 
+    polygonSeries.mapPolygons.template.setAll({
+      interactive: true,
+      templateField: 'settings',
+    });
+
+    polygonSeries.data.setAll([
+      {
+        id: 'europe',
+        // name: '유럽',
+        settings: {
+          fill: colors.next(),
+          fillPattern: am5.LinePattern.new(root, {
+            color: am5.color(0xffffff),
+            rotation: 45,
+            strokeWidth: 1,
+          }),
+        },
+      },
+      {
+        id: 'africa',
+        settings: {
+          fill: colors.next(),
+          fillPattern: am5.LinePattern.new(root, {
+            color: am5.color(0xffffff),
+            rotation: -45,
+            strokeWidth: 1,
+          }),
+        },
+      },
+      {
+        id: '',
+        settings: {
+          fill: colors.next(),
+          fillPattern: am5.LinePattern.new(root, {
+            color: am5.color(0xffffff),
+            rotation: -45,
+            strokeWidth: 1,
+          }),
+        },
+      },
+      {
+        id: 'asia',
+        settings: {
+          fill: colors.next(),
+          fillPattern: am5.RectanglePattern.new(root, {
+            color: am5.color(0xffffff),
+            checkered: true,
+          }),
+        },
+      },
+      {
+        id: 'northAmerica',
+        settings: {
+          fill: colors.next(),
+          fillPattern: am5.CirclePattern.new(root, {
+            color: am5.color(0xffffff),
+            checkered: true,
+          }),
+        },
+      },
+      {
+        id: 'southAmerica',
+        settings: {
+          fill: colors.next(),
+          fillPattern: am5.RectanglePattern.new(root, {
+            color: am5.color(0xffffff),
+            checkered: true,
+          }),
+        },
+      },
+      {
+        id: 'oceania',
+        settings: {
+          fill: colors.next(),
+          fillPattern: am5.LinePattern.new(root, {
+            color: am5.color(0xffff00),
+            checkered: false,
+          }),
+        },
+      },
+    ]);
+
+    // 비행기 이동경로 라인
     let lineSeries = chart.series.push(am5map.MapLineSeries.new(root, {}));
     lineSeries.mapLines.template.setAll({
       stroke: root.interfaceColors.get('alternativeBackground'),
@@ -108,8 +203,10 @@ export default function MapContainer() {
 
     pointSeries.bullets.push(function () {
       let svgIcon = am5.Graphics.new(root, {
-        stroke: am5.color('#fff'),
-        fill: am5.color('#f00'),
+        stroke: am5.color('#000'),
+        strokeWidth: 2,
+        // tooltipHTML
+        fill: am5.color('#fff'),
         showTooltipOn: 'hover',
         scale: 0.2,
         centerX: am5.percent(100),
@@ -118,12 +215,12 @@ export default function MapContainer() {
           'M60.7,45.4C54.1,38.8,45.3,35.2,36,35.2c-9.3,0-18.1,3.6-24.7,10.3C4.6,52,1,60.8,1,70.2c0,6.3,1.5,11.6,4.6,16.7C8.4,91.3,12.1,95,16,98.9c7.3,7.2,15.5,15.4,19,30.5c0.1,0.5,0.5,0.8,1,0.8s0.9-0.3,1-0.8c3.5-15.1,11.7-23.3,19-30.5c3.9-3.9,7.6-7.6,10.4-12.1c3.1-5.1,4.6-10.3,4.6-16.7C71,60.8,67.4,52,60.7,45.4z M36,97.4c-15,0-27.3-12.2-27.3-27.3S21,42.9,36,42.9c15,0,27.3,12.2,27.3,27.3C63.3,85.2,51,97.4,36,97.4z',
       });
 
-      // hover시 svg 이미지 삽입
-      // let hoverState = svgIcon.states.create("hover", {
-      //   fill: am5.color(0x297373),
-      //   stroke: am5.color(0x297373),
-      //   scale: 1.3,
-      // });
+      // marker 호버시 처리
+      let hoverState = svgIcon.states.create('hover', {
+        fill: am5.color(0x297373),
+        stroke: am5.color(0x297373),
+        scale: 1.3,
+      });
       // console.log("hoverState: ", hoverState);
 
       //---------------------------------------------------------------------------------------------------------------
@@ -183,7 +280,8 @@ export default function MapContainer() {
     });
     //----------------------------------------------------------------------------------
 
-    let paris = addCity({ latitude: 48.8567, longitude: 2.351 }, 'Paris');
+    let seoul = addCity({ latitude: 37, longitude: 127 }, 'Seoul');
+    let italy = addCity({ latitude: 41.8905, longitude: 12.4942 }, 'Italy');
     let toronto = addCity(
       { latitude: 43.8163, longitude: -79.4287 },
       'Toronto',
@@ -192,7 +290,7 @@ export default function MapContainer() {
     let havana = addCity({ latitude: 23, longitude: -82 }, 'Havana');
 
     let lineDataItem = lineSeries.pushDataItem({
-      pointsToConnect: [paris, toronto, la, havana],
+      pointsToConnect: [seoul, italy, toronto, la, havana],
     });
 
     let planeSeries = chart.series.push(am5map.MapPointSeries.new(root, {}));
