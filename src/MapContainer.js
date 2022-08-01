@@ -1,10 +1,9 @@
-import { useLayoutEffect, useRef } from 'react';
+import React, {useLayoutEffect, useRef} from 'react';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5map from '@amcharts/amcharts5/map';
 import {TimelineMax} from 'gsap/all';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5geodata_worldLow from '@amcharts/amcharts5-geodata/worldLow';
-import React from 'react';
 
 const body   = document.body;
 const canvas = document.createElement("canvas");
@@ -44,7 +43,13 @@ export default function MapContainer() {
 
     const tl = new TimelineMax({ onUpdate: drawRipple.bind(ripple), onComplete: removeCanvas })
     .to(ripple, 0.4, { alpha: 1, radius: radius })
-    .to(ripple, 0.3, { alpha: 0 }, 0.6);
+    .to(ripple, 0.3, { alpha: 0 }, 0.6).call(() => {
+      window.location.href = '/detail/1'
+    });
+
+    // setTimeout(() => {
+    //   window.location.href = '/detail/1'
+    // }, 700)
   }
 
   function removeCanvas() {
