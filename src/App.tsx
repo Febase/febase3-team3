@@ -5,6 +5,7 @@ import './App.css';
 import MapContainer from './MapContainer';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import DetailPage from "./DetailPage";
+import Cursor from './Cursor/Cursor';
 
 const droneStartMotion = process.env.PUBLIC_URL + '/drone_150_start.gif';
 const droneLoopMotion = process.env.PUBLIC_URL + '/drone_150_loop.gif';
@@ -51,6 +52,17 @@ function App() {
           <Route path="/detail/:id" element={<DetailPage />} />
         </Routes>
       </Router>
+     <Cursor>
+        <div
+          style={{
+            padding: '8px 20px',
+            margin: '16px',
+            backgroundColor: '#919921',
+          }}
+        >
+          target
+        </div>
+      </Cursor>
     </div>
   );
 }
