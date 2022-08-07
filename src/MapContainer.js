@@ -1,10 +1,16 @@
-import { useLayoutEffect, useRef } from 'react';
+import React, {useLayoutEffect, useRef} from 'react';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5map from '@amcharts/amcharts5/map';
+import {TimelineMax} from 'gsap/all';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5geodata_worldLow from '@amcharts/amcharts5-geodata/worldLow';
 import am5geodata_continentsLow from '@amcharts/amcharts5-geodata/continentsLow';
-import React from 'react';
+
+const body   = document.body;
+const canvas = document.createElement("canvas");
+const ctx    = canvas.getContext("2d");
+const angle  = Math.PI * 2;
+let width, height;
 
 export default function MapContainer() {
   //---------------------------------------------------------------------------------------------------------------
@@ -17,6 +23,60 @@ export default function MapContainer() {
 
   const zoomInBtn = () => handleZoomBtn(true);
   const zoomOutBtn = () => handleZoomBtn(false);
+  const clickToDetailPage = (event) => {
+    if (event.target === canvas) return;
+
+    body.appendChild(canvas);
+
+    width  = canvas.width  = body.scrollWidth;
+    height = canvas.height = window.innerHeight;
+
+    const x = event.pageX;
+    const y = event.pageY;
+    const radius = maxDistance(x, y);
+
+    const ripple = {
+      alpha: 0,
+      radius: 0,
+      x: x,
+      y: y
+    };
+
+    const tl = new TimelineMax({ onUpdate: drawRipple.bind(ripple), onComplete: removeCanvas })
+    .to(ripple, 0.4, { alpha: 1, radius: radius })
+    .to(ripple, 0.3, { alpha: 0 }, 0.6).call(() => {
+      window.location.href = '/detail/1'
+    });
+
+    // setTimeout(() => {
+    //   window.location.href = '/detail/1'
+    // }, 700)
+  }
+
+  function removeCanvas() {
+    body.removeChild(canvas);
+  }
+
+  function drawRipple() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, angle, false);
+    ctx.fillStyle = "rgba(0,0,255," + this.alpha + ")";
+    ctx.fill();
+  }
+
+  function maxDistance(x, y) {
+    var point = { x: x, y: y };
+    var da = distanceSq(point, { x: 0, y: 0 });
+    var db = distanceSq(point, { x: width, y: 0 });
+    var dc = distanceSq(point, { x: width, y: height });
+    var dd = distanceSq(point, { x: 0, y: height });
+    return Math.sqrt(Math.max(da, db, dc, dd));
+  }
+
+  function distanceSq(p1, p2) {
+    return Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
+  }
   //---------------------------------------------------------------------------------------------------------------
   useLayoutEffect(() => {
     let root = am5.Root.new('chartdiv');
@@ -354,6 +414,9 @@ export default function MapContainer() {
       <div>
         <button onClick={zoomInBtn}>zoom in</button>
         <button onClick={zoomOutBtn}>zoom out</button>
+      </div>
+      <div className="page-change">
+        <button onClick={clickToDetailPage}>GSAP</button>
       </div>
       {/* //--------------------------------------------------------------------------------------------------------------- */}
     </>
