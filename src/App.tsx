@@ -2,6 +2,9 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { throttle } from 'lodash';
 import './App.css';
+import MapContainer from './MapContainer';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import DetailPage from "./DetailPage";
 
 const droneStartMotion = process.env.PUBLIC_URL + '/drone_150_start.gif';
 const droneLoopMotion = process.env.PUBLIC_URL + '/drone_150_loop.gif';
@@ -42,6 +45,12 @@ function App() {
         onMouseEnter={() => setDroneMotion(droneStartMotion)}
         onMouseLeave={() => setDroneMotion(droneLoopMotion)}
       />
+      <Router>
+        <Routes>
+          <Route path="/" element={<MapContainer />} />
+          <Route path="/detail/:id" element={<DetailPage />} />
+        </Routes>
+      </Router>
     </div>
   );
 }
