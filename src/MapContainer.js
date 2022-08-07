@@ -3,7 +3,6 @@ import * as am5 from '@amcharts/amcharts5';
 import * as am5map from '@amcharts/amcharts5/map';
 import {TimelineMax} from 'gsap/all';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
-import am5geodata_worldLow from '@amcharts/amcharts5-geodata/worldLow';
 import am5geodata_continentsLow from '@amcharts/amcharts5-geodata/continentsLow';
 
 const body   = document.body;
